@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/app/user")
+@RequestMapping("/bank")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/create-profile")
-    public ApiResponse<UserResponse> createProfile(@RequestBody UserProfileRequest userProfileRequest) {
-        UserResponse userResponse = userService.createProfile(userProfileRequest);
+    @PostMapping("/user/update-profile")
+    public ApiResponse<UserResponse> updateProfile(@RequestBody UserProfileRequest userProfileRequest) {
+        UserResponse userResponse = userService.updateProfile(userProfileRequest);
         return new ApiResponse<>(true, "201", "Profile created successfully", userResponse);
     }
 }

@@ -7,7 +7,6 @@ import com.sunday.mecashbank.model.Account;
 import com.sunday.mecashbank.model.User;
 import org.springframework.stereotype.Component;
 
-import java.util.stream.Collectors;
 
 @Component
 public class AccountMapper {
@@ -33,7 +32,7 @@ public class AccountMapper {
 
         return AccountResponse.builder()
                 .accountNumber(account.getAccountNumber())
-                .currency(account.getCurrency().name())
+                .currency(CURRENCY_TYPE.valueOf(account.getCurrency().name()))
                 .balance(account.getBalance())
                 .build();
     }

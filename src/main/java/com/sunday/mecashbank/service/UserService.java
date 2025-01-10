@@ -5,7 +5,7 @@ import com.sunday.mecashbank.DTO.request.UserRequest;
 import com.sunday.mecashbank.DTO.response.UserResponse;
 
 public interface UserService {
-    UserResponse createProfile (UserProfileRequest userProfileRequest);
+    UserResponse updateProfile(UserProfileRequest userProfileRequest);
     UserResponse createAdmin (UserRequest userRequest);
 
 }
