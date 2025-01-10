@@ -7,13 +7,18 @@ import com.sunday.mecashbank.DTO.response.AccountResponse;
 import com.sunday.mecashbank.enums.TRANSACTION_STATUS;
 import com.sunday.mecashbank.enums.TRANSACTION_TYPE;
 import com.sunday.mecashbank.exception.InsufficientFundsException;
+import com.sunday.mecashbank.exception.UserNotFoundException;
 import com.sunday.mecashbank.model.Account;
 import com.sunday.mecashbank.model.Transaction;
+import com.sunday.mecashbank.model.User;
 import com.sunday.mecashbank.repository.AccountRepository;
 import com.sunday.mecashbank.repository.TransactionRepository;
+import com.sunday.mecashbank.repository.UserRepository;
 import com.sunday.mecashbank.service.AccountService;
 import com.sunday.mecashbank.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -27,9 +32,17 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
+    private final UserRepository userRepository;
 
     @Override
     public AccountResponse viewAccountBalance(String accountNumber) throws AccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new UserNotFoundException("User with email " + email + " already exists");
+        }
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account with number " + accountNumber + " not found."));
 
@@ -38,6 +51,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse deposit(String accountNumber, DepositRequest depositRequest) throws AccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new UserNotFoundException("User with email " + email + " already exists");
+        }
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account with number " + accountNumber + " not found."));
 
@@ -59,6 +79,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse withdraw(String accountNumber, WithdrawRequest withdrawRequest) throws AccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new UserNotFoundException("User with email " + email + " already exists");
+        }
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account with number " + accountNumber + " not found."));
 
@@ -84,6 +111,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse transfer(String fromAccountNumber, TransferRequest transferRequest) throws AccountNotFoundException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new UserNotFoundException("User with email " + email + " already exists");
+        }
+
         Account fromAccount = accountRepository.findByAccountNumber(fromAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account with number " + fromAccountNumber + " not found."));
 
@@ -99,15 +133,12 @@ public class AccountServiceImpl implements AccountService {
             throw new InsufficientFundsException("Insufficient funds in the account.");
         }
 
-        // Withdraw from the source account
         fromAccount.setBalance(fromAccount.getBalance().subtract(transferAmount));
         accountRepository.save(fromAccount);
 
-        // Deposit into the target account
         toAccount.setBalance(toAccount.getBalance().add(transferAmount));
         accountRepository.save(toAccount);
 
-        // Save transfer transaction
         Transaction transferTransaction = new Transaction();
         transferTransaction.setTransactionType(TRANSACTION_TYPE.TRANSFER);
         transferTransaction.setAmount(transferAmount);
@@ -122,6 +153,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Transaction> getTransactionHistory(String accountNumber) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = (String) authentication.getPrincipal();
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            throw new UserNotFoundException("User with email " + email + " already exists");
+        }
+
         return transactionRepository.findByAccount_AccountNumberOrderByTransactionDateDesc(accountNumber);
     }
 }
