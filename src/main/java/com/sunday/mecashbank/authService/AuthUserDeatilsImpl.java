@@ -20,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,14 +38,10 @@ public class AuthUserDeatilsImpl implements AuthUserDetails{
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsImpl customUserDetails;
-    private final UserMapper userMapper;
     private final AccountNumberGenerator accountNumberGenerator;
     private final AccountRepository accountRepository;
 
-
-
     @Override
-
     public AuthResponse userSignup(UserSignUpRequest userSignUpRequest) throws Exception {
         User user = new User();
         user.setEmail(userSignUpRequest.getEmail());
@@ -56,6 +54,9 @@ public class AuthUserDeatilsImpl implements AuthUserDetails{
 
         user.setEmail(userSignUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(userSignUpRequest.getPassword()));
+        ROLE role = ROLE.USER;
+        user.setRole(role);
+
         User savedUser = userRepository.save(user);
 
         String accountNumber = generateUniqueAccountNumber();
@@ -73,7 +74,8 @@ public class AuthUserDeatilsImpl implements AuthUserDetails{
         user.prePersist();
         User savedUser2 = userRepository.save(savedUser);
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(),user.getPassword());
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role.name()));
+        Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtProvider.generateToken(authentication);

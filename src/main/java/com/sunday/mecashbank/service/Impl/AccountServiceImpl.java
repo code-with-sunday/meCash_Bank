@@ -1,12 +1,16 @@
 package com.sunday.mecashbank.service.Impl;
 
+import com.sunday.mecashbank.DTO.request.AccountRequest;
 import com.sunday.mecashbank.DTO.request.DepositRequest;
 import com.sunday.mecashbank.DTO.request.TransferRequest;
 import com.sunday.mecashbank.DTO.request.WithdrawRequest;
 import com.sunday.mecashbank.DTO.response.AccountResponse;
+import com.sunday.mecashbank.enums.ACCOUNT_STATUS;
+import com.sunday.mecashbank.enums.CURRENCY_TYPE;
 import com.sunday.mecashbank.enums.TRANSACTION_STATUS;
 import com.sunday.mecashbank.enums.TRANSACTION_TYPE;
 import com.sunday.mecashbank.exception.InsufficientFundsException;
+import com.sunday.mecashbank.exception.UnAuthorizedException;
 import com.sunday.mecashbank.exception.UserNotFoundException;
 import com.sunday.mecashbank.model.Account;
 import com.sunday.mecashbank.model.Transaction;
@@ -31,31 +35,54 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final TransactionService transactionService;
     private final UserRepository userRepository;
+
+    @Override
+    public AccountResponse createAccount(AccountRequest accountRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
+        }
+
+        User user2 = userRepository.findById(accountRequest.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + accountRequest.getUserId()));
+
+        Account newAccount = Account.builder()
+                .accountNumber(accountRequest.getAccountNumber())
+                .currency(CURRENCY_TYPE.valueOf(accountRequest.getCurrency()))
+                .accountStatus(ACCOUNT_STATUS.valueOf(accountRequest.getAccountStatus()))
+                .balance(accountRequest.getBalance())
+                .user(user2)
+                .build();
+
+        accountRepository.save(newAccount);
+
+        AccountResponse response = new AccountResponse(newAccount.getAccountNumber(), newAccount.getCurrency(), newAccount.getBalance());
+
+        return response;
+    }
 
     @Override
     public AccountResponse viewAccountBalance(String accountNumber) throws AccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            throw new UserNotFoundException("User with email " + email + " already exists");
-        }
 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
+        }
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account with number " + accountNumber + " not found."));
 
         return new AccountResponse(account.getAccountNumber(), account.getCurrency(), account.getBalance());
+
     }
 
     @Override
     public AccountResponse deposit(String accountNumber, DepositRequest depositRequest) throws AccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            throw new UserNotFoundException("User with email " + email + " already exists");
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
         }
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
@@ -80,10 +107,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse withdraw(String accountNumber, WithdrawRequest withdrawRequest) throws AccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            throw new UserNotFoundException("User with email " + email + " already exists");
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
         }
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
@@ -112,10 +138,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse transfer(String fromAccountNumber, TransferRequest transferRequest) throws AccountNotFoundException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            throw new UserNotFoundException("User with email " + email + " already exists");
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
         }
 
         Account fromAccount = accountRepository.findByAccountNumber(fromAccountNumber)
@@ -154,10 +179,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<Transaction> getTransactionHistory(String accountNumber) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = (String) authentication.getPrincipal();
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
-            throw new UserNotFoundException("User with email " + email + " already exists");
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
         }
 
         return transactionRepository.findByAccount_AccountNumberOrderByTransactionDateDesc(accountNumber);

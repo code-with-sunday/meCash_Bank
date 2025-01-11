@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthUserDetails authUserDetails;
 
-    @PostMapping("/signup")
+    @PostMapping("/user/signup")
     public ApiResponse<AuthResponse> userSignup(@RequestBody UserSignUpRequest userSignUpRequest) throws Exception {
         AuthResponse authResponse = authUserDetails.userSignup(userSignUpRequest);
         return new ApiResponse<>(true, "201", "User created successfully", authResponse);

@@ -1,10 +1,13 @@
 package com.sunday.mecashbank.service.Impl;
 
 import com.sunday.mecashbank.DTO.response.TransactionResponse;
+import com.sunday.mecashbank.exception.UnAuthorizedException;
 import com.sunday.mecashbank.model.Transaction;
 import com.sunday.mecashbank.repository.TransactionRepository;
 import com.sunday.mecashbank.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +21,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionResponse> getTransactionHistory(String accountNumber) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnAuthorizedException("Session timed out, please Login first");
+        }
         List<Transaction> transactions = transactionRepository.findByAccount_AccountNumberOrderByTransactionDateDesc(accountNumber);
 
         return transactions.stream()
