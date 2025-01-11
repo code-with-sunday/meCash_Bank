@@ -1,5 +1,6 @@
 package com.sunday.mecashbank.controller;
 
+import com.sunday.mecashbank.DTO.request.AccountRequest;
 import com.sunday.mecashbank.DTO.request.DepositRequest;
 import com.sunday.mecashbank.DTO.request.TransferRequest;
 import com.sunday.mecashbank.DTO.request.WithdrawRequest;
@@ -7,6 +8,7 @@ import com.sunday.mecashbank.DTO.response.AccountResponse;
 import com.sunday.mecashbank.DTO.response.ApiResponse;
 import com.sunday.mecashbank.model.Transaction;
 import com.sunday.mecashbank.service.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,12 @@ import java.util.List;
 public class AccountController {
 
     private final AccountService accountService;
+
+    @PostMapping("/accounts/create")
+    public ApiResponse<AccountResponse> createAccount(@Valid @RequestBody AccountRequest accountRequest) {
+        AccountResponse accountResponse = accountService.createAccount(accountRequest);
+        return new ApiResponse<>(true, "201","Account created", accountResponse);
+    }
 
     @GetMapping("/accounts/{accountNumber}/balance")
     public ApiResponse<AccountResponse> viewAccountBalance(@PathVariable String accountNumber) throws AccountNotFoundException {

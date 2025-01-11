@@ -1,6 +1,5 @@
 package com.sunday.mecashbank.DTO.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -22,4 +21,7 @@ public class UserSignUpRequest {
     @NotNull(message = "Password is mandatory")
     @NotEmpty(message = "Password is mandatory")
     private String password;
+
+    @NotNull(message = "Username is mandatory")
+    private String userName;
 }

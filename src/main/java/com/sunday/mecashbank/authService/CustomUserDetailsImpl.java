@@ -47,6 +47,4 @@ public class CustomUserDetailsImpl implements UserDetailsService {
             }
         };
     }
-
-
 }

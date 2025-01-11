@@ -72,6 +72,17 @@ Below are the key endpoints for interacting with the **meCash** API:
 - **POST /bank/accounts/{fromAccountNumber}/transfer** - Transfer money from one account to another.
 - **GET /bank/accounts/{accountNumber}/transactions** - View all transactions for a specific account.
 
+![ME-CASH BANK-APPLICATION](signup.png)
+======================================
+![ME-CASH BANK-APPLICATION](dbsignup.png)
+* DB showing signup and password hashed and saved authomatically account created on signup
+  
+=============================
+  ![ME-CASH BANK-APPLICATION](balance_view.png)
+* Innitial balance
+=============================
+![ME-CASH BANK-APPLICATION](deposit.png)
+* Making deposit
 # meCash - Database Schema
 
 This document outlines the database schema for the **meCash** financial application, which allows businesses and individuals to send and receive money across different currencies.
@@ -141,6 +152,7 @@ The `transactions` table stores all transaction records related to user accounts
 - **Transaction and Target Account**:
     - A **transaction** may optionally have a **target account** (used for transfers).
     - The `transactions` table has a foreign key `target_account_id` referencing `accounts(id)`.
+
 
 ## Table Creation SQL Scripts
 

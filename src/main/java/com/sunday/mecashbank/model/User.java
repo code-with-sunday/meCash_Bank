@@ -17,7 +17,8 @@ import java.util.List;
 @ToString
 @Table(name = "users")
 public class User extends AuditBaseEntity{
-    @Column(nullable = false, unique = true)
+
+    @Column(unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -26,10 +27,10 @@ public class User extends AuditBaseEntity{
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String firstName;
 
-    @Column(nullable = false)
+    @Column
     private String lastName;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

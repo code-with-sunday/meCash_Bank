@@ -1,5 +1,6 @@
 package com.sunday.mecashbank.service;
 
+import com.sunday.mecashbank.DTO.request.AccountRequest;
 import com.sunday.mecashbank.DTO.request.DepositRequest;
 import com.sunday.mecashbank.DTO.request.TransferRequest;
 import com.sunday.mecashbank.DTO.request.WithdrawRequest;
@@ -10,6 +11,9 @@ import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
 
 public interface AccountService {
+
+    AccountResponse createAccount(AccountRequest accountRequest);
+
     AccountResponse viewAccountBalance(String accountNumber) throws AccountNotFoundException;
 
     AccountResponse deposit(String accountNumber, DepositRequest depositRequest) throws AccountNotFoundException;
